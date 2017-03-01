@@ -6,8 +6,9 @@ import Paper from 'material-ui/Paper';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import DatePicker from 'material-ui/DatePicker';
-import Chip from 'material-ui/Chip';
-
+import TimePicker from 'material-ui/TimePicker';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 export default class NewMessage extends Component {
 	constructor(props){
@@ -19,11 +20,11 @@ export default class NewMessage extends Component {
 			open2:false,
 			summary:'',
 		        location:'',
-		        startDate:'',
-		        endDate:'',
+		        startDate:new Date(),
 			username:'',
 			eventurl:'',
-			chips:[]
+			startTime:new Date(),
+			duration:1
 		};
 		this.handleOpen=this.handleOpen.bind(this);
 		this.handleClose=this.handleClose.bind(this);
@@ -37,14 +38,16 @@ export default class NewMessage extends Component {
 		this.handleChangeStartDate=this.handleChangeStartDate.bind(this);
 		this.handleChangeEndDate=this.handleChangeEndDate.bind(this);
 		this.handleKeyPress=this.handleKeyPress.bind(this);
-		this.handleClosePre=this.handleClosePre.bind(this);
+		this.handleStartTimeChange=this.handleStartTimeChange.bind(this);
+		this.handleDurationChange=this.handleDurationChange.bind(this);
 	}
 
 	componentDidMount(){
 		let that=this;
-		that.props.psocket.on('confirmSetRemainder', function(result, summary, location){
+		that.props.psocket.on('confirmSetRemainder', function(result, summary, location,date,time){
 			console.log("confirmSetRemainderResult: ", result);
-			that.setState({open: true, summary: summary, location:location});
+			console.log(new Date(date),"This is date");
+			that.setState({open: true, summary: summary, location:location,startDate:new Date(date),startTime:new Date(time)});
 		});
 		that.props.psocket.on('noToken', function(username, summary, location, sd, ed){
 			that.setState({open1: true, username:username, summary: summary, location:location, startDate:sd, endDate:ed});
@@ -57,33 +60,7 @@ export default class NewMessage extends Component {
 			console.log('event created in new message : ',link);
 			that.setState({open2:true, eventurl:link});
 		})
-		that.props.psocket.on('presentation', function(){
-            that.setState({openPresentation:true});
-        });
 	}
-
-			handleAddChip(chip){
-			console.log("got this chip: ",chip);
-			let chips = chip.split(' ');
-			this.setState((prevState,props)=>{
-				console.log("pushing this chip: ",chips.slice(-1)[0]);
-				prevState.chips.push(chips.slice(-1)[0]);
-
-				return {chips:prevState.chips};
-
-			});
-		}
-
-		handleDeleteChip(chip){
-			console.log("deleting this chip: ",chip);
-
-			this.setState((prevState,props)=>{
-				let index = prevState.chips.indexOf(chip);
-				if(index> -1)
-					prevState.chips.splice(index,1);
-				return {chips:prevState.chips};
-			});
-		}
 
 	handleOpen(){
 		this.setState({open: true});
@@ -96,8 +73,30 @@ export default class NewMessage extends Component {
 	handleSubmit(){
 		this.setState({open: false});
 		console.log('sd on comp : ',this.state.startDate);
-		console.log('ed on comp : ',this.state.endDate);
-		this.props.psocket.emit('remainderAccepted', this.props.name, this.state.summary, this.state.location, this.state.startDate, this.state.endDate);
+		//console.log('ed on comp : ',this.state.endDate);
+		let a=this.state.startTime;
+		let b=this.state.startDate;
+		console.log(a,b,"Time");
+		let startTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours(),a.getMinutes());
+		let endTime=new Date();
+		if(this.state.duration==1){
+			endTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours()+1,a.getMinutes());
+		}
+		else if(this.state.duration==2){
+			endTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours()+1,a.getMinutes()+30);
+		}
+		else if(this.state.duration==3){
+			endTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours()+2,a.getMinutes());
+		}
+		else if(this.state.duration==4){
+			endTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours()+12,a.getMinutes());
+		}
+		else if(this.state.duration==5){
+			endTime=new Date(b.getFullYear(),b.getMonth(),b.getDate(),a.getHours()+24,a.getMinutes());
+		}
+		console.log("Start Time",startTime);
+		console.log("End Time",endTime)
+		this.props.psocket.emit('remainderAccepted', this.props.name, this.state.summary, this.state.location, startTime, endTime);
 	}
 
 	handleOpen1(){
@@ -121,10 +120,6 @@ export default class NewMessage extends Component {
 	handleClose2(){
     this.setState({open2: false});
   };
-
-  handleClosePre(){
-        this.setState({openPresentation:false});
-    }
 
 	handleChangeStartDate(e,date){
 		 console.log("Date is ", date);
@@ -158,64 +153,39 @@ export default class NewMessage extends Component {
 		this.setState({userInput:e.target.value});
 	}
 
-handleKeyPress(event){
-		console.log(event.key);
-
-		if(event.key === 'Enter'){
-			console.log('enter press here! ')
-			if(this.state.userInput!=="")
-			{this.props.psocket.emit("send message",this.props.name,this.props.channelId,this.state.userInput,this.state.chips);
-					this.setState({userInput:"",chips:[]});}
-		}
-		else if(event.key==='Control'){
-			console.log(event.key);
-			let trimmed = this.state.userInput.trimRight();
-			if(trimmed.length > 0)
-			{
-				let array = trimmed.split(/ +/);
-				console.log("splitted is : ",array);
-				let chip = array.splice(-1)[0];
-
-				console.log("chip value is : ",chip);
-				this.setState((prevState,props)=>{
-					if(!prevState.chips.includes(chip))
-					{
-						prevState.chips.push(chip);
-						let len = trimmed.length - chip.length;
-						trimmed = trimmed.substr(0,len);
-						console.log("thi si trimmed,",trimmed)
-					}
-
-					return {chips:prevState.chips,userInput:trimmed};
-				});
-			}
-		}
+	handleKeyPress(event){
+	if(event.key === 'Enter'){
+		console.log('enter press here! ')
+		if(this.state.userInput!=="")
+		{this.props.psocket.emit("send message",this.props.name,this.props.channelId,this.state.userInput);
+				this.setState({userInput:""});}
 	}
-
-
+}
 
 	handleClick(){
 		if(this.state.userInput!=="")
-		{this.props.psocket.emit("send message",this.props.name,this.props.channelId,this.state.userInput,this.state.chips);
-				this.setState({userInput:"",chips:[]});}
+		{this.props.psocket.emit("send message",this.props.name,this.props.channelId,this.state.userInput);
+				this.setState({userInput:""});}
 	}
 
+	handleStartTimeChange(event,date){
+		//console.log(duration,"Selected Duration");
+		console.log(date.getHours(),":",date.getMinutes(),date,"Selected Date");
+	}
+
+   handleDurationChange(event, index, duration){this.setState({duration})};
+
 	render() {
-				let renderChips=this.state.chips.map((item,i)=>{
-			return (<Chip key={i} style={{
-    										display: 'inline-block',
-    										
-  										}} onRequestDelete={this.handleDeleteChip.bind(this,item)}>{item}</Chip>);
-		});
+		console.log(this.state,"This is state");
 		let obj = {
 			username:this.state.username,
 			summary:this.state.summary,
 			location:this.state.location,
 			startDate:this.state.startDate,
-			endDate:this.state.endDate
+			startTime:this.state.startTime,
+			Duration:this.state.duration
 		}
-		const presentationurl = 'https://prezi.com/8rwmj5cy2z5v/edit/#53_24309637';
-		const url='https://accounts.google.com/o/oauth2/auth?redirect_uri=http://bob.blr.stackroute.in/oauth2callback&state='+JSON.stringify(obj)+'&response_type=code&client_id=616007233163-g0rk4o8g107upgrmcuji5a8jpnbkd228.apps.googleusercontent.com&scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&approval_prompt=force&access_type=offline';
+		const url='https://accounts.google.com/o/oauth2/auth?redirect_uri=http://localhost:8000/oauth2callback&state='+JSON.stringify(obj)+'&response_type=code&client_id=616007233163-g0rk4o8g107upgrmcuji5a8jpnbkd228.apps.googleusercontent.com&scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&approval_prompt=force&access_type=offline';
 		const eventurl=this.state.eventurl;
 		const actions = [
 	     <FlatButton
@@ -250,19 +220,6 @@ handleKeyPress(event){
 	       onTouchTap={this.handleClose2}
 	     />
 		 ];
-		 const presentationAction = [
-             <FlatButton
-           label="Close"
-           keyboardFocused={true}
-           onTouchTap={this.handleClosePre}
-         />,
-             <FlatButton
-               href={presentationurl}
-                 target="_blank"
-           label="START"
-           keyboardFocused={true}
-         />
-         ];
 		 if (this.state.open) {
 			return (<div>
 			<Dialog
@@ -274,8 +231,15 @@ handleKeyPress(event){
 			>
 				Summary : <TextField hintText="Enter the summary" value={this.state.summary} onChange={this.handleChangeSummary}/><br/>
 				Location : <TextField hintText="Enter the location" value={this.state.location} onChange={this.handleChangeLocation}/><br/>
-				Start Date : <DatePicker hintText="Date Picker" onChange={this.handleChangeStartDate}/><br/>
-				End Date : <DatePicker hintText="Date Picker" onChange={this.handleChangeEndDate}/>
+				Start Date : <DatePicker hintText="Start Date" value={this.state.startDate} onChange={this.handleChangeStartDate}/><br/>
+				Start Time: <TimePicker hintText="Start Time" value={this.state.startTime} onChange={this.handleStartTimeChange}/>
+				Duration: <SelectField floatingLabelText="duration" value={this.state.duration} onChange={this.handleDurationChange}>
+							<MenuItem value={1} primaryText="1 Hr" />
+					        <MenuItem value={2} primaryText="1.5 Hrs" />
+					        <MenuItem value={3} primaryText="2 Hrs" />
+					        <MenuItem value={4} primaryText="Half Day" />
+					        <MenuItem value={5} primaryText="Full Day" />
+					       </SelectField>
 			</Dialog>
 		</div>);
 		}
@@ -306,34 +270,18 @@ handleKeyPress(event){
         </Dialog>
       </div>);
 		}
-		else if(this.state.openPresentation) {
-            return (<div>
-       <Dialog
-         title="Do you want BOB to start presentation"
-         actions={presentationAction}
-         modal={false}
-         open={this.state.openPresentation}
-         onRequestClose={this.handleClosePre}
-       >
-       </Dialog>
-     </div>);
-        }
 		else {
 			return (
 					<Paper style={{marginLeft:"0px"}}>
 						<Grid style={{width:"100%"}}>
 							<Row style={{width:"100%"}}>
-								<Col xs={7} sm={7} md={7} lg={7}>
+								<Col xs={11} sm={11} md={11} lg={11}>
 									<TextField style={{marginLeft:"0px"}} value={this.state.userInput} hintText="Type Message"
-										fullWidth={true} onKeyDown={this.handleKeyPress}
+										fullWidth={true} onKeyPress={this.handleKeyPress}
 										onChange={this.handleChange.bind(this)}/>
 								</Col>
-								<Col xs={4} sm={4} md={4} lg={4}>
-										{renderChips}
-								</Col>
 								<Col xs={1} sm={1} md={1} lg={1} style={{position:'relative',right:15,top:5}} >
-										<RaisedButton style={{marginLeft:"0px"}} label="SEND" primary={true}
-									 onClick={this.handleClick.bind(this)} />
+									<RaisedButton style={{marginLeft:"0px"}} label="SEND" primary={true} onClick={this.handleClick.bind(this)} />
 								</Col>
 							</Row>
 						</Grid>
