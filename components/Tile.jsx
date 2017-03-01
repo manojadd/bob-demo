@@ -55,7 +55,7 @@ export default class Tile extends React.Component{
 	componentWillMount(){  //get the initial set of messages from server.
 		let that = this;
 		request
-			.get('http://bob.blr.stackroute.in/user/'+this.props.userId+'/Tiles/'+this.props.tileId+"/Messages")
+			.get('http://localhost:8000/user/'+this.props.userId+'/Tiles/'+this.props.tileId+"/Messages")
             .end(function(err,res){
                 console.log("this is response from server\n\n ",res,"\n\n");
                 let parsed_res = JSON.parse(res.text);
@@ -68,7 +68,7 @@ export default class Tile extends React.Component{
 	componentDidMount(){ //after mounting, get the tile info for this tile
 		let that = this;
 		request
-			.get('http://bob.blr.stackroute.in/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
+			.get('http://localhost:8000/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
 			.end(function(err,reply){
 				reply = JSON.parse(reply.text);
 				if(!reply.result)
@@ -112,7 +112,7 @@ export default class Tile extends React.Component{
 		let that = this;
 		request
 
-			.get('http://bob.blr.stackroute.in/user/'+this.props.userId+'/channels') //get the channles user is part of
+			.get('http://localhost:8000/user/'+this.props.userId+'/channels') //get the channles user is part of
 
 			.end(function(err,reply){
 				reply = JSON.parse(reply.text);
@@ -135,7 +135,7 @@ export default class Tile extends React.Component{
 
 		request
 
-			.get('http://bob.blr.stackroute.in/user/'+this.props.userId+'/Tiles/'+this.props.tileId) //get the tileconfig data
+			.get('http://localhost:8000/user/'+this.props.userId+'/Tiles/'+this.props.tileId) //get the tileconfig data
 			.end(function(err,reply){
 				reply = JSON.parse(reply.text);
 				if(!reply.result)
@@ -180,32 +180,41 @@ export default class Tile extends React.Component{
 	computeChannels(){ //compute the channels for the selected project in configure tile.
 		console.log("happeining");
 		let data=[];
-		data = this.state.channels.filter((item,index)=>{
+
+		
+
+		data = this.state.channels.filter((item,index)=>{  //get all project channels
 			return item.split('#')[0]===this.state.filterInputs.projectInput;
 		});
+
+
+		data = data.filter((item,index)=>{    //remove the channels already included
+			return !(this.state.filters.channels.includes(item));
+		}); 
+
 		data = data.map((item,index)=>{
 			return '#'+item.split('#')[1];
 		});
 		this.setState({filteredChannels:data});
 	}
 
-	handleTagInput(event){  //handle the data from tag input field
-		event.persist();
-		let data = event.target.value;
-		let status;
-		if(data.includes(' ')||data.length==0)
-			status = false;
-		else
-			status = true;
-		this.setState({tOkay:status});
-		this.setState((prevState,props)=>{
-			prevState.filterInputs.tagInput = event.target.value;
-			if(prevState.pOkay&&prevState.cOkay&&prevState.tOkay)
-				return {filterInputs:prevState.filterInputs,Okay:true};
-			else
-				return {filterInputs:prevState.filterInputs,Okay:false};
-		});
-	}
+	// handleTagInput(event){  //handle the data from tag input field
+	// 	event.persist();
+	// 	let data = event.target.value;
+	// 	let status;
+	// 	if(data.includes(' ')||data.length==0)
+	// 		status = false;
+	// 	else
+	// 		status = true;
+	// 	this.setState({tOkay:status});
+	// 	this.setState((prevState,props)=>{
+	// 		prevState.filterInputs.tagInput = event.target.value;
+	// 		if(prevState.pOkay&&prevState.cOkay&&prevState.tOkay)
+	// 			return {filterInputs:prevState.filterInputs,Okay:true};
+	// 		else
+	// 			return {filterInputs:prevState.filterInputs,Okay:false};
+	// 	});
+	// }
 
 	handleProjectInput(value){ //handle project input field. set bools for validation
 		console.log("project");
@@ -219,7 +228,7 @@ export default class Tile extends React.Component{
 			return {filterInputs:prevState.filterInputs,pOkay:status};
 		});
 		this.setState((prevState,props)=>{
-			if(prevState.pOkay&&prevState.cOkay&&prevState.tOkay)
+			if(prevState.pOkay&&prevState.cOkay)
 				return {Okay:true};
 			else
 				return {Okay:false};
@@ -227,9 +236,10 @@ export default class Tile extends React.Component{
 	}
 
 	handleChannelInput(value){  //handle channel input field. set bools for validation.
-		console.log("channel");
+		console.log("channel list is:",this.state.filteredChannels," given channel",value," this.state.filterinputs.projectinput",this.state.filterInputs.projectInput);
 		let status;
-		if(this.state.filters.channels.includes(this.state.filterInputs.projectInput+value))
+
+		if(this.state.filteredChannels.includes(value))
 			status = true;
 		else
 			status = false;
@@ -238,7 +248,7 @@ export default class Tile extends React.Component{
 			return {filterInputs:prevState.filterInputs,cOkay:status};
 		});
 		this.setState((prevState,props)=>{
-			if(prevState.pOkay&&prevState.cOkay&&prevState.tOkay)
+			if(prevState.pOkay&&prevState.cOkay)
 				return {Okay:true};
 			else
 				return {Okay:false};
@@ -249,7 +259,7 @@ export default class Tile extends React.Component{
 		this.setState((prevState,props)=>{
 			let channel = prevState.filterInputs.projectInput+prevState.filterInputs.channelInput;
 			prevState.filters.channels.push(channel);
-			prevState.filters.tags.push(prevState.filterInputs.tagInput);
+			//prevState.filters.tags.push(prevState.filterInputs.tagInput);
 				return {
 						filters:prevState.filters,
 						filterInputs:
@@ -284,11 +294,21 @@ export default class Tile extends React.Component{
     }
 
 	handleSave(){  //save the selected filters to server.
+		let that = this;
 		request
-			.patch('http://bob.blr.stackroute.in/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
+			.patch('http://localhost:8000/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
 			.send(this.state.filters)
 			.end(function(err,res){
 					console.log("result of save ",res.text);
+					request
+						.get('http://localhost:8000/user/'+that.props.userId+'/Tiles/'+that.props.tileId+"/Messages")
+            			.end(function(err,res){
+                		console.log("this is response from server\n\n ",res,"\n\n");
+               			let parsed_res = JSON.parse(res.text);
+                		console.log("this is parsed res of messages",parsed_res);
+                		if(parsed_res.result)
+                			that.setState({msgList : parsed_res.data});
+            		});
 
 			});
 		this.handleClose.bind(this)();
@@ -300,7 +320,7 @@ export default class Tile extends React.Component{
 	handleClear(){  //clear the tile notifications.
 		this.setState({msgList:[]});
 		request
-			.patch('http://bob.blr.stackroute.in/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
+			.patch('http://localhost:8000/user/'+this.props.userId+'/Tiles/'+this.props.tileId)
 			.send({lastCleared:new Date()})
 			.end(function(err,res){
 					console.log("result of save ",res.text);
@@ -314,21 +334,19 @@ export default class Tile extends React.Component{
 
 	render(){
 
+		console.log("this is the render",this.state);
 
 		//below dialog is the configuration tile dialog.
 		let dialog= (<div><Dialog open={this.state.dialogOpen} onRequestClose={this.handleClose.bind(this)}
 						title="Change Tile Settings"
 					>
-						<AutoComplete hintText="Enter the project" onUpdateInput={this.handleProjectInput.bind(this)}
-							value ={this.state.filterInputs.projectInput} errorText="Enter a project that you are part of."
+						<AutoComplete hintText="Project" onUpdateInput={this.handleProjectInput.bind(this)}
+							searchText ={this.state.filterInputs.projectInput} 
 							onBlur={this.computeChannels.bind(this)} dataSource={this.state.projects}
 						/>
-						<AutoComplete hintText="Enter the channel" onUpdateInput={this.handleChannelInput.bind(this)}
-							value ={this.state.filterInputs.channelInput} errorText="Enter a channel that you are part of."
+						<AutoComplete hintText="Channel" onUpdateInput={this.handleChannelInput.bind(this)}
+							searchText ={this.state.filterInputs.channelInput}
 							dataSource={this.state.filteredChannels}
-						/>
-						<TextField value={this.state.filterInputs.tagInput} hintText="Enter the tags"
-							onChange={this.handleTagInput.bind(this)}
 						/>
 						<RaisedButton disabled= {!this.state.Okay} label="ADD" primary={true}
 							onClick={this.handleAdd.bind(this)}
