@@ -318,10 +318,11 @@ module.exports = function(io, socket) {
         pub.publish('channel1', `User with socket id: ${socket.id} has unsubscribed`);
     }
     // FIXME: rewrite without using io
-    function handleSendMessage(sender, channelID, msg,tags) { //it will publish to the given channel and put it in database.FIXME:see 50 limit has reached
+    function handleSendMessage(sender, channelID, msg) { //it will publish to the given channel and put it in database.FIXME:see 50 limit has reached
         let date = new Date();
         let obj = {};
-        obj = { 'sender': sender, 'msg': msg, 'TimeStamp': date ,'tags':tags} //-and if reached put it to mongoDB. Better write this function again.
+        let time=new Date();
+        obj = { 'sender': sender, 'msg': msg, 'TimeStamp': date } //-and if reached put it to mongoDB. Better write this function again.
         pub.publish(channelID, JSON.stringify(obj));
         pushToRedis(channelID, obj);
         let url = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/cfab6737-9b9c-4f38-9119-b834418fc8e8?subscription-key=2e2d4fc5300843e4a29b3bc644edad19" + "&q=" + msg + "&verbose=true",
@@ -332,23 +333,31 @@ module.exports = function(io, socket) {
             console.log('inside response');
             //Add Reminder START ---------->
             if(response.body.topScoringIntent.intent === "Add Reminder"){
+                console.log("Inside Reminder",response.body.entities);
               if(response.body.entities.length>=1){
-                if (response.body.entities[0].type==="builtin.datetime.date") {
-                  summary='',location='';
+                for (var i = 0; i < response.body.entities.length; i++) {
+                  if (response.body.entities[i].type==="meeting::date") {
+                    if(response.body.entities[i].entity=="tomorrow"){
+                        console.log("Inside Tomorrow");
+                        let a=new Date();
+                        date=new Date(a.getFullYear(),a.getMonth(),a.getDate()+1);
+                    }
+                    
+                  }
+                  else if (response.body.entities[i].type==="meeting::time") {
+                    console.log("Inside Time");
+                    console.log(response.body.entities[i].entity);
+                        time=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),response.body.entities[i].entity);
+                        console.log(time);
+                  }
+                  else if(response.body.entities[i].type==="meeting::summary"){
+                    summary = response.body.entities[i].entity;
+                  }
+                  else if (response.body.entities[i].type==="meeting::location") {
+                    location = response.body.entities[i].entity;
+                  }
                 }
-                else if(response.body.entities[0].type==="meeting::summary"){
-                  summary = response.body.entities[0].entity;
-                }
-                else if (response.body.entities[0].type==="meeting::location") {
-                  location = response.body.entities[0].entity;
-                }
-                else if (response.body.entities[1].type==="meeting::summary") {
-                  summary = response.body.entities[1].entity;
-                }
-                else if(response.body.entities[1].type==="meeting::location"){
-                  location = response.body.entities[1].entity;
-                }
-                socket.emit('confirmSetRemainder', response.body.dialog.status.toUpperCase(), summary, location);
+                socket.emit('confirmSetRemainder', response.body.dialog.status.toUpperCase(), summary, location,date,time);
               }
             }
             //Add Reminder END ---------->
@@ -369,12 +378,6 @@ module.exports = function(io, socket) {
               });
             }
             //Tasks END ---------->
-
-            //presentation START ---------->
-           else if (response.body.topScoringIntent.intent === "presentation") {
-             socket.emit('presentation');
-           }
-           //presentation END ---------->
           }
         });
     }
