@@ -44,9 +44,11 @@ router.post('/user/:userId/Tiles', function(req, res) { //add a new tile
         let ob = {
 
             "w": 2,
-            "h": 2,
+            "h": 3,
             "x": 5,
             "y": 5,
+            "minW":3,
+            "minH":3,
             "i": reply._id,
             "moved": false,
             "static": false
@@ -441,7 +443,7 @@ router.post('/user/:userId/Tiles/:projectId', function(req, res) { //add a new t
             "moved": true,
             "static": false,
             "minW" : 2,
-            "minH" :2,
+            "minH" :3,
             "maxW" :6,
             "maxH" :6,
 
@@ -512,7 +514,7 @@ module.exports = router;
 
 
 //sample output
-/*GET=>http://bob.blr.stackroute.in/user/tanay/Layout
+/*GET=>http://localhost:8000/user/tanay/Layout
 {
   "result": true,
   "data": [
@@ -537,7 +539,7 @@ module.exports = router;
   ]
 }
 
-PUT=>http://bob.blr.stackroute.in/user/tanay/Layout
+PUT=>http://localhost:8000/user/tanay/Layout
 Request->
 {
 "layout":[
