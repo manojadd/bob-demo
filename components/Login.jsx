@@ -18,9 +18,9 @@ export default class Login extends React.Component
                              <CardMedia mediaStyle={{maxHeight:'100%'}} overlayContainerStyle={{marginBottom:'10%',opacity:'0.9',backgroundColor:'none',overflow:'hidden'}}
                                  overlayContentStyle={{background:'none'}}
                                 overlay={<RaisedButton label="Login with GITHUB"
-                                    href="https://github.com/login/oauth/authorize?client_id=ad2adcbfe26251810f6f" primary={true} />}
+                                    href="https://github.com/login/oauth/authorize?client_id=1b4daad08bbe4298d833" primary={true} />}
                                 >
-                                    <img src="http://localhost:8000/static/images/final.jpg" style={{maxHeight:'100%'}}/>
+                                    <img src="http://bob.blr.stackroute.in/static/images/final.jpg" style={{maxHeight:'100%'}}/>
                             </CardMedia>
                         </Card>
                 </Row>

@@ -50,7 +50,7 @@ export default class ChannelList extends React.Component{
    }
  componentDidMount() {
      console.log(this.props.channelList,this.props.currentChannel,"Inside ChannelList");
-     request.get('http://localhost:8000/users/'+this.props.userName+'/projects/'+cookie.load('projectName')+'/siblings')
+     request.get('http://bob.blr.stackroute.in/users/'+this.props.userName+'/projects/'+cookie.load('projectName')+'/siblings')
             .end((err,reply)=>{
               let res = JSON.parse(reply.text);
               if(res.result)
@@ -134,7 +134,7 @@ export default class ChannelList extends React.Component{
 
   handleAddDirectMessage(){ //added by manoj
      request
-      .post('http://localhost:8000/users/'+ this.props.userName +'/channels') //create a new DM chat
+      .post('http://bob.blr.stackroute.in/users/'+ this.props.userName +'/channels') //create a new DM chat
       .send({
             "userId":this.props.userName,
             "toId":this.state.DMDialogInput,
@@ -187,7 +187,7 @@ export default class ChannelList extends React.Component{
       this.props.socket.emit('createGitChannel',this.props.userName,this.props.currentChannel.split("#")[0]);
       console.log("Submit Clickeddddddd");
       this.setState({gOpen:false});
-      request.post('http://localhost:8000/user/'+this.props.userName+'/gitChannel/'+this.state.addedRepos)
+      request.post('http://bob.blr.stackroute.in/user/'+this.props.userName+'/gitChannel/'+this.state.addedRepos)
       .end(function(err,res){
         console.log("Post Done");
       })
