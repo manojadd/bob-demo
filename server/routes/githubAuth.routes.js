@@ -24,7 +24,7 @@ router.use(bodyParser.json());
 
 router.post('/hooks',function(req,res){
  // console.log("Hooks",req.body);
- if(res!=null){
+ if(res!=null||res!=undefined){
  console.log(req.body.head_commit.message,req.body.head_commit.timestamp,req.body.head_commit.url,req.body.head_commit.author.username,req.body.repository.name);
   let message={};
       message["author_name"]=req.body.head_commit.author.username;
