@@ -21290,7 +21290,7 @@ var Header = function (_React$Component) {
 					_react2.default.createElement(_notifications2.default, null)
 				)
 			),
-			socket: (0, _socket2.default)('http://localhost:8000')
+			socket: (0, _socket2.default)('http://bob.blr.stackroute.in')
 		};
 		_this.handleToggle = _this.handleToggle.bind(_this);
 		_this.handleLogOut = _this.handleLogOut.bind(_this);
@@ -33633,7 +33633,7 @@ var LayoutComponent = function (_Component) {
   }, {
     key: 'saveLayout',
     value: function saveLayout(Layout) {
-      _superagent2.default.put('http://localhost:8000/user/' + this.state.userId + '/Layout').set('Content-Type', 'application/json').send({ layout: Layout }).end(function (err, res) {
+      _superagent2.default.put('http://bob.blr.stackroute.in/user/' + this.state.userId + '/Layout').set('Content-Type', 'application/json').send({ layout: Layout }).end(function (err, res) {
         console.log("this is response from server on load\n\n\n\n ", res, "\n\n\n\n");
         var parsed_res = JSON.parse(res.text);
         console.log("this is parsed res", parsed_res);
@@ -33644,7 +33644,7 @@ var LayoutComponent = function (_Component) {
     key: 'componentWillMount',
     value: function componentWillMount() {
       var that = this;
-      _superagent2.default.get('http://localhost:8000/user/' + this.state.userId + '/Layout').end(function (err, res) {
+      _superagent2.default.get('http://bob.blr.stackroute.in/user/' + this.state.userId + '/Layout').end(function (err, res) {
         console.log("this is response from server on load\n\n\n\n ", res, "\n\n\n\n");
         var parsed_res = JSON.parse(res.text);
         console.log("this is parsed res", parsed_res);
@@ -33661,10 +33661,10 @@ var LayoutComponent = function (_Component) {
     value: function addTile() {
       console.log("clicked");
       var that = this;
-      _superagent2.default.post('http://localhost:8000/user/' + that.state.userId + '/Tiles/' + _reactCookie2.default.load('projectName')).end(function (err, res) {
+      _superagent2.default.post('http://bob.blr.stackroute.in/user/' + that.state.userId + '/Tiles/' + _reactCookie2.default.load('projectName')).end(function (err, res) {
         console.log("this is response from server on adding tile\n\n\n\n ", res, "\n\n\n\n");
         if (JSON.parse(res.text).result) {
-          _superagent2.default.get('http://localhost:8000/user/' + that.state.userId + '/Layout').end(function (err, res) {
+          _superagent2.default.get('http://bob.blr.stackroute.in/user/' + that.state.userId + '/Layout').end(function (err, res) {
             console.log("this is response from server on getting layout\n\n\n\n ", res, "\n\n\n\n");
             var parsed_res = JSON.parse(res.text);
             console.log("this is parsed res of layout get", parsed_res);
@@ -33678,8 +33678,8 @@ var LayoutComponent = function (_Component) {
     value: function deleteTile(tileId) {
       console.log("dlelte");
       var that = this;
-      _superagent2.default.delete('http://localhost:8000/user/' + this.state.userId + '/Tiles/' + tileId).end(function (err, reply) {
-        _superagent2.default.get('http://localhost:8000/user/' + that.state.userId + '/Layout').end(function (err, res) {
+      _superagent2.default.delete('http://bob.blr.stackroute.in/user/' + this.state.userId + '/Tiles/' + tileId).end(function (err, reply) {
+        _superagent2.default.get('http://bob.blr.stackroute.in/user/' + that.state.userId + '/Layout').end(function (err, res) {
           console.log("this is response from server on load\n\n\n\n ", res, "\n\n\n\n");
           var parsed_res = JSON.parse(res.text);
           console.log("this is parsed res", parsed_res);
@@ -33849,9 +33849,9 @@ var Login = function (_React$Component) {
                                 { mediaStyle: { maxHeight: '100%' }, overlayContainerStyle: { marginBottom: '10%', opacity: '0.9', backgroundColor: 'none', overflow: 'hidden' },
                                     overlayContentStyle: { background: 'none' },
                                     overlay: _react2.default.createElement(_RaisedButton2.default, { label: 'Login with GITHUB',
-                                        href: 'https://github.com/login/oauth/authorize?client_id=ad2adcbfe26251810f6f', primary: true })
+                                        href: 'https://github.com/login/oauth/authorize?client_id=1b4daad08bbe4298d833', primary: true })
                                 },
-                                _react2.default.createElement('img', { src: 'http://localhost:8000/static/images/final.jpg', style: { maxHeight: '100%' } })
+                                _react2.default.createElement('img', { src: 'http://bob.blr.stackroute.in/static/images/final.jpg', style: { maxHeight: '100%' } })
                             )
                         )
                     )
@@ -33993,7 +33993,7 @@ var ProjectDetails = function (_Component) {
       this.context.socket.on("takeProjectList", function (projectsList, usersList) {
         console.log(usersList);
         console.log("asking channels of ", userName);
-        _superagent2.default.get('http://localhost:8000/user/' + userName + '/channels').end(function (err, res) {
+        _superagent2.default.get('http://bob.blr.stackroute.in/user/' + userName + '/channels').end(function (err, res) {
 
           if (JSON.parse(res.text).result) {
             res = JSON.parse(res.text);
@@ -34116,7 +34116,7 @@ var ProjectDetails = function (_Component) {
         var avatar = a.split("#")[1];
 
         //this.context.socket.emit("JoinTeam",userName,this.state.projectName1,avatar);
-        _superagent2.default.post('http://localhost:8000/user/' + userName + "/project").send({ userName: userName, projectName: this.state.projectName1, avatar: avatar }).end(function (err, res) {
+        _superagent2.default.post('http://bob.blr.stackroute.in/user/' + userName + "/project").send({ userName: userName, projectName: this.state.projectName1, avatar: avatar }).end(function (err, res) {
           if (JSON.parse(res.text).result) _reactRouter.hashHistory.push("/bob");else {
             console.log("error is ", JSON.parse(res.text).status);
             _this2.setState({ joinError: JSON.parse(res.text).status });
@@ -34125,7 +34125,7 @@ var ProjectDetails = function (_Component) {
       }
       // console.log(this.state.projectName1);
       // let that=this;
-      // request.patch("http://localhost:8000/channels/"+this.state.projectName1+"/user/"+userName).end(function(err,reply){
+      // request.patch("http://bob.blr.stackroute.in/channels/"+this.state.projectName1+"/user/"+userName).end(function(err,reply){
       //   if(JSON.parse(reply.text).result==true){
       //     that.setState({request:JSON.parse(reply.text).status});
       //   }
@@ -39884,7 +39884,7 @@ var ChannelList = function (_React$Component) {
       var _this2 = this;
 
       console.log(this.props.channelList, this.props.currentChannel, "Inside ChannelList");
-      _superagent2.default.get('http://localhost:8000/users/' + this.props.userName + '/projects/' + _reactCookie2.default.load('projectName') + '/siblings').end(function (err, reply) {
+      _superagent2.default.get('http://bob.blr.stackroute.in/users/' + this.props.userName + '/projects/' + _reactCookie2.default.load('projectName') + '/siblings').end(function (err, reply) {
         var res = JSON.parse(reply.text);
         if (res.result) {
           _this2.setState({ userList: res.data });
@@ -39970,7 +39970,7 @@ var ChannelList = function (_React$Component) {
       var _this3 = this;
 
       //added by manoj
-      _superagent2.default.post('http://localhost:8000/users/' + this.props.userName + '/channels') //create a new DM chat
+      _superagent2.default.post('http://bob.blr.stackroute.in/users/' + this.props.userName + '/channels') //create a new DM chat
       .send({
         "userId": this.props.userName,
         "toId": this.state.DMDialogInput,
@@ -40025,7 +40025,7 @@ var ChannelList = function (_React$Component) {
       this.props.socket.emit('createGitChannel', this.props.userName, this.props.currentChannel.split("#")[0]);
       console.log("Submit Clickeddddddd");
       this.setState({ gOpen: false });
-      _superagent2.default.post('http://localhost:8000/user/' + this.props.userName + '/gitChannel/' + this.state.addedRepos).end(function (err, res) {
+      _superagent2.default.post('http://bob.blr.stackroute.in/user/' + this.props.userName + '/gitChannel/' + this.state.addedRepos).end(function (err, res) {
         console.log("Post Done");
       });
     }
@@ -40558,7 +40558,7 @@ var Chat = function (_React$Component) {
 			var _this5 = this;
 
 			var a = this.props.channelID.split("#");
-			_superagent2.default.get("http://localhost:8000/add/" + a[0] + "/channel/" + a[1]).end(function (err, res) {
+			_superagent2.default.get("http://bob.blr.stackroute.in/add/" + a[0] + "/channel/" + a[1]).end(function (err, res) {
 				res = JSON.parse(res.text);
 				_this5.setState({ membersList: res.data, addOpen: true, create: false });
 			});
@@ -41076,13 +41076,12 @@ var ChatHistory = function (_Component) {
 									_Card.CardText,
 									{ style: cardtext, subtitle: _react2.default.createElement(_Checkbox2.default, { onCheck: _this3.props.bookmark.bind(_this3, message), checkedIcon: _react2.default.createElement(_favorite2.default, null),
 											uncheckedIcon: _react2.default.createElement(_favoriteBorder2.default, null) }) },
-									'REPOSITORY NAME:',
+									'Commited in ',
 									message.repo_name,
-									_react2.default.createElement('br', null),
-									'COMMIT MESSAGE:',
+									' Repository with message ',
 									message.message,
 									_react2.default.createElement('br', null),
-									'REPO URL:',
+									'URL:',
 									message.url
 								),
 								_react2.default.createElement(_Card.CardMedia, { style: { position: 'relative', marginTop: 0, marginLeft: '90%' }, overlayContentStyle: { background: '#ffffff' }, overlay: _react2.default.createElement(_Checkbox2.default, { onCheck: _this3.props.bookmark.bind(_this3, message), checkedIcon: _react2.default.createElement(_favorite2.default, null),
@@ -41542,7 +41541,7 @@ var NewMessage = function (_Component) {
 				endDate: this.state.endDate
 			};
 			var presentationurl = 'https://prezi.com/8rwmj5cy2z5v/edit/#53_24309637';
-			var url = 'https://accounts.google.com/o/oauth2/auth?redirect_uri=http://localhost:8000/oauth2callback&state=' + JSON.stringify(obj) + '&response_type=code&client_id=616007233163-g0rk4o8g107upgrmcuji5a8jpnbkd228.apps.googleusercontent.com&scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&approval_prompt=force&access_type=offline';
+			var url = 'https://accounts.google.com/o/oauth2/auth?redirect_uri=http://bob.blr.stackroute.in/oauth2callback&state=' + JSON.stringify(obj) + '&response_type=code&client_id=616007233163-g0rk4o8g107upgrmcuji5a8jpnbkd228.apps.googleusercontent.com&scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&approval_prompt=force&access_type=offline';
 			var eventurl = this.state.eventurl;
 			var actions = [_react2.default.createElement(_FlatButton2.default, {
 				label: 'Close',
@@ -42233,7 +42232,7 @@ var Tile = function (_React$Component) {
 		value: function componentWillMount() {
 			//get the initial set of messages from server.
 			var that = this;
-			_superagent2.default.get('http://localhost:8000/user/' + this.props.userId + '/Tiles/' + this.props.tileId + "/Messages").end(function (err, res) {
+			_superagent2.default.get('http://bob.blr.stackroute.in/user/' + this.props.userId + '/Tiles/' + this.props.tileId + "/Messages").end(function (err, res) {
 				console.log("this is response from server\n\n ", res, "\n\n");
 				var parsed_res = JSON.parse(res.text);
 				console.log("this is parsed res", parsed_res);
@@ -42247,7 +42246,7 @@ var Tile = function (_React$Component) {
 
 			//after mounting, get the tile info for this tile
 			var that = this;
-			_superagent2.default.get('http://localhost:8000/user/' + this.props.userId + '/Tiles/' + this.props.tileId).end(function (err, reply) {
+			_superagent2.default.get('http://bob.blr.stackroute.in/user/' + this.props.userId + '/Tiles/' + this.props.tileId).end(function (err, reply) {
 				reply = JSON.parse(reply.text);
 				if (!reply.result) console.log("No tile found for this user");else {
 					var data = reply.data;
@@ -42284,7 +42283,7 @@ var Tile = function (_React$Component) {
 		value: function handleEdit() {
 			//get data for configuring tile and opne tile
 			var that = this;
-			_superagent2.default.get('http://localhost:8000/user/' + this.props.userId + '/channels') //get the channles user is part of
+			_superagent2.default.get('http://bob.blr.stackroute.in/user/' + this.props.userId + '/channels') //get the channles user is part of
 
 			.end(function (err, reply) {
 				reply = JSON.parse(reply.text);
@@ -42303,7 +42302,7 @@ var Tile = function (_React$Component) {
 				}
 			});
 
-			_superagent2.default.get('http://localhost:8000/user/' + this.props.userId + '/Tiles/' + this.props.tileId) //get the tileconfig data
+			_superagent2.default.get('http://bob.blr.stackroute.in/user/' + this.props.userId + '/Tiles/' + this.props.tileId) //get the tileconfig data
 			.end(function (err, reply) {
 				reply = JSON.parse(reply.text);
 				if (!reply.result) console.log("No tile found for this user");else {
@@ -42445,7 +42444,7 @@ var Tile = function (_React$Component) {
 		key: 'handleSave',
 		value: function handleSave() {
 			//save the selected filters to server.
-			_superagent2.default.patch('http://localhost:8000/user/' + this.props.userId + '/Tiles/' + this.props.tileId).send(this.state.filters).end(function (err, res) {
+			_superagent2.default.patch('http://bob.blr.stackroute.in/user/' + this.props.userId + '/Tiles/' + this.props.tileId).send(this.state.filters).end(function (err, res) {
 				console.log("result of save ", res.text);
 			});
 			this.handleClose.bind(this)();
@@ -42455,7 +42454,7 @@ var Tile = function (_React$Component) {
 		value: function handleClear() {
 			//clear the tile notifications.
 			this.setState({ msgList: [] });
-			_superagent2.default.patch('http://localhost:8000/user/' + this.props.userId + '/Tiles/' + this.props.tileId).send({ lastCleared: new Date() }).end(function (err, res) {
+			_superagent2.default.patch('http://bob.blr.stackroute.in/user/' + this.props.userId + '/Tiles/' + this.props.tileId).send({ lastCleared: new Date() }).end(function (err, res) {
 				console.log("result of save ", res.text);
 			});
 		}
